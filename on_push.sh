@@ -35,13 +35,13 @@ on_push_pr_branch() {
     exit 1
   fi
 
-  BASE_BRANCH_DETAIL_URL=$(jq -r .repository.git_refs_url < "${GITHUB_EVENT_PATH}" | sed "s@{.*}@/${PR_BASE}@g")
+  BASE_BRANCH_DETAIL_URL=$(jq -r .repository.git_refs_url < "${GITHUB_EVENT_PATH}" | sed "s@{.*}@/heads/${PR_BASE}@g")
   curl \
         --fail \
         -X GET \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        "${BASE_BRANCH_DETAIL_URL}" > /dev/null || return 1
+        "${BASE_BRANCH_DETAIL_URL}" | jq '.ref' || return 1
 
 
   PR_BODY=$(jq -r '.commits|map(.message)|join("<br>")' < "${GITHUB_EVENT_PATH}")
