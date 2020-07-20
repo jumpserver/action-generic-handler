@@ -1,0 +1,6 @@
+name: 'JumpServer repos generic action'
+description: ''
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
