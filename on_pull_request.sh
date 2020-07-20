@@ -22,7 +22,7 @@ on_pull_request_close_del_branch_if_need() {
         -X DELETE \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        "${PR_HEAD_BRANCH_URL}"
+        "${PR_HEAD_BRANCH_URL}" || echo "May be has deleted"
 }
 
 
@@ -58,7 +58,7 @@ on_pull_request_open_edit_auto_label_it() {
         --data ${data} \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        "${PR_ISSUE_URL}"
+        "${PR_ISSUE_URL}" > /dev/null
 }
 
 

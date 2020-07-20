@@ -19,7 +19,7 @@ on_push_pr_branch() {
   PR_BASE=$(echo "${PR_HEAD}" | sed -E 's@pr_([a-zA-Z0-9]+)_.*@\1@g')
 
   if ! echo "${PR_HEAD}" | grep -E 'pr_[a-zA-Z0-9]+_.+';then
-    echo "Not a pr request branch, should be pr_${PR_BASE}_other: ${PR_HEAD}"
+    echo "Not a pr request branch, should be pr_BRANCH_other: ${PR_HEAD}"
     return 0
   fi
 
@@ -45,7 +45,7 @@ on_push_pr_branch() {
         --data "$(generate_create_pr_data)" \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        "${PR_URL}"
+        "${PR_URL}" > /dev/null
 }
 
 if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
