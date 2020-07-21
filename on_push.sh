@@ -68,8 +68,8 @@ on_push_pr_branch() {
 
 function add_remote_github() {
   # Clone仓库
-  git config --global user.name "github-actions"
-  git config --global user.email "github-actions@jumpserver.org"
+  git config --global user.name "fit2bot"
+  git config --global user.email "robot@jumpserver.org"
   remote_url="https://${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
   rm -rf GITHUB_REPO
   git clone "${remote_url}" "GITHUB_REPO" && cd "GITHUB_REPO" || exit 2
