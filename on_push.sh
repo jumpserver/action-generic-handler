@@ -92,17 +92,18 @@ rebase_branch_and_push_pr_branch() {
 
   for b in $PR_BASES;do
     echo "$b"
-    full_branch_name="pr@${b}@${PR_OTHER}"
-    origin_branch_name="origin/$b"
+    git fetch github
+    new_pr_branch_name="pr@${b}@${PR_OTHER}"
+    remote_branch_name="github/$b"
     git checkout "${PR_HEAD}"
-    git checkout -b "${full_branch_name}" || continue
-    ret=$(git rebase "${PR_REBASE_START}" --onto="${origin_branch_name}")
+    git checkout -b "${new_pr_branch_name}" || continue
+    ret=$(git rebase "${PR_REBASE_START}" --onto="${remote_branch_name}")
     if [[ "${ret}" != "0" ]];then
       echo "Rebase failed"
       git rebase --abort
       continue
     fi
-    git push github "${full_branch_name}:${full_branch_name}"
+    git push github "${new_pr_branch_name}:${new_pr_branch_name}"
   done
   git branch | grep 'pr'
 }
