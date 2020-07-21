@@ -53,7 +53,7 @@ on_push_pr_branch() {
         "${BASE_BRANCH_DETAIL_URL}" | jq '.ref' || return 1
 
 
-  PR_BODY=$(jq -r '.commits|map(.message)|join("<br>")' < "${GITHUB_EVENT_PATH}")
+  PR_BODY=$(jq -r '.commits|map(.message)|join("<br>")' < "${GITHUB_EVENT_PATH}" | td '\n' '<br>')
   PR_URL=$(jq -r '.repository.pulls_url' < "${GITHUB_EVENT_PATH}"|sed 's@{.*}@@g')
 
 
