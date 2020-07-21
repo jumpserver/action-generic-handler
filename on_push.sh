@@ -123,6 +123,8 @@ rebase_branch_and_push_pr_branch() {
   git branch | grep 'pr'
 
   clean_remote_github
+  # 清理掉这个分支
+  git push origin :"${PR_HEAD}"
 }
 
 if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
