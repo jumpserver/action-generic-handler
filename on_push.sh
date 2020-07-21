@@ -18,6 +18,11 @@ EOF
 
 # 当push了 PR Request分支(分支名称 pr@${TO_BRANCH}@other)
 on_push_pr_branch() {
+  CREATED=$(jq -r .created < "${GITHUB_EVENT_PATH}")
+  if [[ "${CREATED}" != "true" ]];then
+    echo "Not a new create branch, pass"
+    return 0
+  fi
   PR_REF=$(jq -r .ref < "${GITHUB_EVENT_PATH}")
   PR_HEAD=$(basename "${PR_REF}")
   PR_BASE=$(echo "${PR_HEAD}" | awk -F@ '{ print $2 }')
