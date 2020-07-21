@@ -122,7 +122,7 @@ rebase_branch_and_push_pr_branch() {
       git rebase --abort || echo ""
       continue
     fi
-    git push origin "${new_pr_branch_name}:${new_pr_branch_name}"
+    git push -f origin "${new_pr_branch_name}:${new_pr_branch_name}"
   done
   git checkout "${PR_HEAD}" || echo ""
   git branch | grep 'pr'
