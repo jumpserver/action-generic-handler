@@ -38,7 +38,7 @@ on_push_pr_branch() {
     return 0
   fi
 
-  PR_TITLE=$(jq -r .head_commit.message < "${GITHUB_EVENT_PATH}")
+  PR_TITLE=$(jq -r .head_commit.message < "${GITHUB_EVENT_PATH}" | head -1)
   if [[ -z "${PR_TITLE}" ]];then
     echo "No commit found, exit"
     exit 1
