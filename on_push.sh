@@ -108,8 +108,8 @@ rebase_branch_and_push_pr_branch() {
     new_pr_branch_name="pr@${b}@${PR_OTHER}"
     remote_branch_name="origin/$b"
     git checkout "${PR_HEAD}" || echo ""
-    git branch -D "${new_pr_branch_name}" || echo ""
-    git checkout -b "${new_pr_branch_name}" || echo ""
+    git branch -D "${new_pr_branch_name}" &> /dev/null || echo ""
+    git checkout -b "${new_pr_branch_name}"
     git rebase "${PR_REBASE_START}" --onto="${remote_branch_name}"
     ret="$?"
     if [[ "${ret}" != "0" ]];then
@@ -122,9 +122,9 @@ rebase_branch_and_push_pr_branch() {
   git checkout "${PR_HEAD}" || echo ""
   git branch | grep 'pr'
 
-  clean_remote_github
-  # 清理掉这个分支
+  # 清理掉这个分支, 再清理本地仓库
   git push origin :"${PR_HEAD}"
+  clean_remote_github
 }
 
 if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
