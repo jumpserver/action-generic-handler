@@ -77,6 +77,7 @@ function add_remote_github() {
   git fetch origin
   git remote -v
 }
+
 function clean_remote_github() {
   cd ..
   rm -rf "GITHUB_REPO"
