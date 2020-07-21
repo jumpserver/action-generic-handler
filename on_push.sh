@@ -1,4 +1,8 @@
 #!/bin/bash
+# Require env
+# GITHUB_TOKEN
+# GITHUB_EVENT_PATH
+# GITHUB_REPOSITORY
 
 generate_create_pr_data()
 {
@@ -58,10 +62,14 @@ on_push_pr_branch() {
 }
 
 function add_remote_github() {
+  git status
+  git remove -v
   git config --global user.name "github-actions"
   git config --global user.email "github-actions@jumpserver.org"
   remote_url="https://${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
-  git remote add github "${remote_url}"
+  git remote remove github || echo ""
+  git remote add github "${remote_url}" || echo ""
+  git remove -v
 }
 
 # 当push了 PR Request分支(分支名称 repr@TO_BRANCHES@REBASE_START@OTHER)
@@ -89,23 +97,27 @@ rebase_branch_and_push_pr_branch() {
 
   # 添加github认证
   add_remote_github
+  git fetch github
 
   for b in $PR_BASES;do
-    echo "$b"
-    git fetch github
+    echo ">>> Start process $b"
     new_pr_branch_name="pr@${b}@${PR_OTHER}"
     remote_branch_name="github/$b"
-    git checkout "${PR_HEAD}"
-    git checkout -b "${new_pr_branch_name}" || continue
-    ret=$(git rebase "${PR_REBASE_START}" --onto="${remote_branch_name}")
+    git checkout "${PR_HEAD}" || echo ""
+    git branch -D "${new_pr_branch_name}" || echo ""
+    git checkout -b "${new_pr_branch_name}" || echo ""
+    git rebase "${PR_REBASE_START}" --onto="${remote_branch_name}"
+    ret="$?"
     if [[ "${ret}" != "0" ]];then
-      echo "Rebase failed"
-      git rebase --abort
+      echo "Rebase failed ${ret}: ${remote_branch_name}"
+      git rebase --abort || echo ""
       continue
     fi
-    git push github "${new_pr_branch_name}:${new_pr_branch_name}"
+    #git push github "${new_pr_branch_name}:${new_pr_branch_name}"
   done
+  git checkout "${PR_HEAD}" || echo ""
   git branch | grep 'pr'
+  git remote remove github || echo ""
 }
 
 if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
