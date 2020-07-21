@@ -1,8 +1,8 @@
 #!/bin/bash
 # Require env
 # GITHUB_TOKEN
-# GITHUB_EVENT_PATH
-# GITHUB_REPOSITORY
+# GITHUB_EVENT_PATH=/tmp/abc.json
+# GITHUB_REPOSITORY=ibuler/koko
 
 generate_create_pr_data()
 {
@@ -62,14 +62,19 @@ on_push_pr_branch() {
 }
 
 function add_remote_github() {
-  git status
-  git remove -v
+  # Clone仓库
   git config --global user.name "github-actions"
   git config --global user.email "github-actions@jumpserver.org"
   remote_url="https://${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
-  git remote remove github || echo ""
-  git remote add github "${remote_url}" || echo ""
-  git remove -v
+  rm -rf GITHUB_REPO
+  git clone "${remote_url}" "GITHUB_REPO" && cd "GITHUB_REPO" || exit 2
+  git status
+  git fetch origin
+  git remote -v
+}
+function clean_remote_github() {
+  cd ..
+  rm -rf "GITHUB_REPO"
 }
 
 # 当push了 PR Request分支(分支名称 repr@TO_BRANCHES@REBASE_START@OTHER)
@@ -82,11 +87,11 @@ rebase_branch_and_push_pr_branch() {
   PR_OTHER=$(echo "${PR_HEAD}" | awk -F@ '{ print $4 }')
 
   if ! echo "${PR_HEAD}" | grep -E '^repr@[a-zA-Z0-9._]+@[a-z0-9]+@.+';then
-    echo "Not a pr request branch, should be pr_BRANCH_other: ${PR_HEAD}"
+    echo "Not a pr request branch, should be repr@TO_BRANCHES@REBASE_START@OTHER: ${PR_HEAD}"
     return 0
   fi
 
-  # 应该是pr_${TO_BRANCH}_other
+  # 应该是master_v1.0_v2.0
   if [[ -z "${PR_BASES}" ]];then
     echo "Unexpect error occur"
     return 0
@@ -97,12 +102,11 @@ rebase_branch_and_push_pr_branch() {
 
   # 添加github认证
   add_remote_github
-  git fetch github
 
   for b in $PR_BASES;do
-    echo ">>> Start process $b"
+    echo -e "\n>>> Start process $b"
     new_pr_branch_name="pr@${b}@${PR_OTHER}"
-    remote_branch_name="github/$b"
+    remote_branch_name="origin/$b"
     git checkout "${PR_HEAD}" || echo ""
     git branch -D "${new_pr_branch_name}" || echo ""
     git checkout -b "${new_pr_branch_name}" || echo ""
@@ -113,11 +117,12 @@ rebase_branch_and_push_pr_branch() {
       git rebase --abort || echo ""
       continue
     fi
-    #git push github "${new_pr_branch_name}:${new_pr_branch_name}"
+    git push origin "${new_pr_branch_name}:${new_pr_branch_name}"
   done
   git checkout "${PR_HEAD}" || echo ""
   git branch | grep 'pr'
-  git remote remove github || echo ""
+
+  clean_remote_github
 }
 
 if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
