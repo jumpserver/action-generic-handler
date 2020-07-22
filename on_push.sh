@@ -38,7 +38,7 @@ on_push_pr_branch() {
     return 0
   fi
 
-  PR_TITLE=$(jq -r .head_commit.message < "${GITHUB_EVENT_PATH}")
+  PR_TITLE=$(jq -r .head_commit.message < "${GITHUB_EVENT_PATH}" | head -1)
   if [[ -z "${PR_TITLE}" ]];then
     echo "No commit found, exit"
     exit 1
@@ -53,7 +53,7 @@ on_push_pr_branch() {
         "${BASE_BRANCH_DETAIL_URL}" | jq '.ref' || return 1
 
 
-  PR_BODY=$(jq -r '.commits|map(.message)|join("<br>")' < "${GITHUB_EVENT_PATH}")
+  PR_BODY=$(jq -r '.commits|map(.message)|join("<br>")' < "${GITHUB_EVENT_PATH}" | td '\n' '<br>')
   PR_URL=$(jq -r '.repository.pulls_url' < "${GITHUB_EVENT_PATH}"|sed 's@{.*}@@g')
 
 
