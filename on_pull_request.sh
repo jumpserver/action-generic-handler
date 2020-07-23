@@ -62,6 +62,27 @@ on_pull_request_open_edit_auto_label_it() {
 }
 
 
+on_pull_request_open_add_reviewer() {
+  PR_ACTION=$(jq -r .action < "${GITHUB_EVENT_PATH}")
+  if [[ "${PR_ACTION}" != "opened" ]];then
+    echo "不是新建issue, 跳过设置reviewer"
+    return 0
+  fi
+  PR_URL=$(jq -r .pull_request.url < "${GITHUB_EVENT_PATH}")
+  PR_REVIEWER_URL="${PR_URL}/requested_reviewers"
+
+  data='{"team_reviewers":["developers"]}'
+
+  curl \
+        --fail \
+        -X POST \
+        --data ${data} \
+        -H 'Content-Type: application/json' \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "${PR_REVIEWER_URL}" > /dev/null
+}
+
+
 if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]];then
   echo "Is not pull request event, exit"
   exit 0
@@ -69,3 +90,4 @@ fi
 
 on_pull_request_close_del_branch_if_need
 on_pull_request_open_edit_auto_label_it
+on_pull_request_open_add_reviewer
