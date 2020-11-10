@@ -38,13 +38,13 @@ on_pull_request_open_edit_auto_label_it() {
   label=""
 
   if [[ "${PR_TITLE}" =~ "fix" ]];then
-    label="fix"
+    label="类型:bug"
   elif [[ "${PR_TITLE}" =~ "feat" ]];then
-    label="新功能"
+    label="类型:新功能"
   elif [[ "${PR_TITLE}" =~ "perf" || ${PR_TITLE} =~ "refactor" ]];then
-    label="优化"
+    label="类型:优化"
   elif [[ "${PR_TITLE}" =~ "ci" ]];then
-    label="无需处理"
+    label="结果:无需处理"
   fi
   if [[ -z "${label}" ]];then
     return 0
