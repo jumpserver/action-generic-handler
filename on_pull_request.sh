@@ -54,7 +54,7 @@ on_pull_request_open_edit_auto_label_it() {
 
   curl \
         --fail \
-        -X PATCH \
+        -X POST \
         --data ${data} \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
