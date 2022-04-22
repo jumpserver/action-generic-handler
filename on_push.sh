@@ -104,6 +104,11 @@ rebase_branch_and_push_pr_branch() {
     return 0
   fi
 
+  # REBASE_START 是 head1, head2, headn, 转换成 HEAD~1 HEAD~2 HEAD~n
+  if [[ $PR_REBASE_START == head* ]];then
+    PR_REBASE_START=$(echo "${PR_REBASE_START}" | awk '{gsub(/head/,"HEAD~");print $0}')
+  fi
+
   # 切换成可迭代的
   PR_BASES=$(echo "${PR_BASES}" | tr "_" "\n")
 
