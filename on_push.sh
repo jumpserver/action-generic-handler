@@ -93,7 +93,7 @@ rebase_branch_and_push_pr_branch() {
   PR_REBASE_START=$(echo "${PR_HEAD}" | awk -F@ '{ print $3 }')
   PR_OTHER=$(echo "${PR_HEAD}" | awk -F@ '{ print $4 }')
 
-  if ! echo "${PR_HEAD}" | grep -E '^repr@[a-zA-Z0-9._]+@[a-z0-9]+@.+';then
+  if ! echo "${PR_HEAD}" | grep -E '^repr@[a-zA-Z0-9._-]+@[a-z0-9]+@.+';then
     echo "Not a pr request branch, should be repr@TO_BRANCHES@REBASE_START@OTHER: ${PR_HEAD}"
     return 0
   fi
