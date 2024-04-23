@@ -27,7 +27,7 @@ on_push_pr_branch() {
   PR_HEAD=$(basename "${PR_REF}")
   PR_BASE=$(echo "${PR_HEAD}" | awk -F@ '{ print $2 }')
 
-  if ! echo "${PR_HEAD}" | grep -E '^pr@[a-zA-Z0-9._]+@.+';then
+  if ! echo "${PR_HEAD}" | grep -E '^pr@[a-zA-Z0-9._-]+@.+';then
     echo "Not a pr request branch, should be pr_BRANCH_other: ${PR_HEAD}"
     return 0
   fi
