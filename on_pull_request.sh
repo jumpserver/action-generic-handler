@@ -38,24 +38,22 @@ on_pull_request_open_edit_auto_label_it() {
   label=""
 
   if [[ "${PR_TITLE}" =~ "fix" ]];then
-    label="类型:bug"
+    label="🐛 Bug"
   elif [[ "${PR_TITLE}" =~ "feat" ]];then
-    label="类型:新功能"
+    label="⭐️ Feature Request"
   elif [[ "${PR_TITLE}" =~ "perf" || ${PR_TITLE} =~ "refactor" ]];then
-    label="类型:优化"
-  elif [[ "${PR_TITLE}" =~ "ci" ]];then
-    label="结果:无需处理"
+    label="🚀 Performance"
   fi
   if [[ -z "${label}" ]];then
     return 0
   fi
 
-  data='{"labels":["'"${label}"'"]}'
+  data="{\"labels\":[\"${label}\"]}"
 
   curl \
         --fail \
         -X POST \
-        --data ${data} \
+        --data "$data" \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "${PR_ISSUE_URL}" > /dev/null
