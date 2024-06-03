@@ -20,19 +20,19 @@ translate() {
   text=$1
   I18N_TOKEN=${I18N_TOKEN:-''}
   if [[ -z "${I18N_TOKEN}" ]];then
-    echo "$text"
+    echo $text
     return 0
   fi
   data=$(printf '{"text": "%s", "target_lang": "english", "source_lang": "chinese"}' "$text")
   response=$(curl https://api.cloudflare.com/client/v4/accounts/0e3ac565ec78e610ad54c0b9c40e62ff/ai/run/@cf/meta/m2m100-1.2b \
       -X POST \
       -H "Authorization: Bearer ${I18N_TOKEN}" \
-      -d "$data" | jq ".result.translated_text")
+      -d "$data" | jq -r ".result.translated_text")
 
   if [[ -z "${response}" ]];then
-    echo "$text"
+    echo $text
   else
-    echo "$response"
+    echo $response
   fi
 }
 
