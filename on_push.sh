@@ -16,6 +16,27 @@ generate_create_pr_data()
 EOF
 }
 
+translate() {
+  text=$1
+  I18N_TOKEN=${I18N_TOKEN:-''}
+  if [[ -z "${I18N_TOKEN}" ]];then
+    echo $text
+    return 0
+  fi
+  data=$(printf '{"text": "%s", "target_lang": "english", "source_lang": "chinese"}' "$text")
+  response=$(curl https://api.cloudflare.com/client/v4/accounts/0e3ac565ec78e610ad54c0b9c40e62ff/ai/run/@cf/meta/m2m100-1.2b \
+      -X POST \
+      -H "Authorization: Bearer ${I18N_TOKEN}" \
+      -d "$data" | jq -r ".result.translated_text")
+
+  if [[ -z "${response}" ]];then
+    echo $text
+  else
+    echo $response
+  fi
+}
+
+
 # 当push了 PR Request分支(分支名称 pr@${TO_BRANCH}@other)
 on_push_pr_branch() {
   CREATED=$(jq -r .created < "${GITHUB_EVENT_PATH}")
@@ -43,6 +64,7 @@ on_push_pr_branch() {
     echo "No commit found, exit"
     exit 1
   fi
+  PR_TITLE=$(translate "${PR_TITLE}")
 
   BASE_BRANCH_DETAIL_URL=$(jq -r .repository.git_refs_url < "${GITHUB_EVENT_PATH}" | sed "s@{.*}@/heads/${PR_BASE}@g")
   curl \
@@ -54,8 +76,8 @@ on_push_pr_branch() {
 
 
   PR_BODY=$(jq -r '.commits|map(.message)|join("<br>")' < "${GITHUB_EVENT_PATH}" | tr '\n' ' ')
+  PR_BODY=$(translate "${PR_BODY}")
   PR_URL=$(jq -r '.repository.pulls_url' < "${GITHUB_EVENT_PATH}"|sed 's@{.*}@@g')
-
 
   curl \
         --fail \
