@@ -18,6 +18,7 @@ EOF
 
 translate() {
   text=$1
+  I18N_TOKEN=${I18N_TOKEN:-''}
   if [[ -z "${I18N_TOKEN}" ]];then
     echo "$text"
   fi
