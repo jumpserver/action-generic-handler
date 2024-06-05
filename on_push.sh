@@ -20,19 +20,22 @@ translate() {
   text=$1
   I18N_TOKEN=${I18N_TOKEN:-''}
   if [[ -z "${I18N_TOKEN}" ]];then
-    echo $text
+    echo "$text"
     return 0
   fi
-  data=$(printf '{"text": "%s", "target_lang": "english", "source_lang": "chinese"}' "$text")
-  response=$(curl https://api.cloudflare.com/client/v4/accounts/0e3ac565ec78e610ad54c0b9c40e62ff/ai/run/@cf/meta/m2m100-1.2b \
+  url="https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=zh&to=en"
+  data=$(printf '[{"text": "%s"}]' "$text")
+  result=$(curl "${url}" \
       -X POST \
-      -H "Authorization: Bearer ${I18N_TOKEN}" \
-      -d "$data" | jq -r ".result.translated_text")
+      -H "Ocp-Apim-Subscription-Key: ${I18N_TOKEN}" \
+      -H "Ocp-Apim-Subscription-Region: japanwest" \
+      -H "Content-Type: application/json;charset=UTF-8" \
+      -d "$data" | jq -r ".[0].translations[0].text")
 
-  if [[ -z "${response}" ]];then
-    echo $text
+  if [[ -z "${result}" ]];then
+    echo "${text}"
   else
-    echo $response
+    echo "${result}"
   fi
 }
 
