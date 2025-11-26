@@ -80,6 +80,44 @@ on_pull_request_open_add_reviewer() {
         "${PR_REVIEWER_URL}" > /dev/null
 }
 
+on_pull_request_close_del_branch_if_need() {
+  # 读取 PR action
+  PR_ACTION=$(jq -r .action < "${GITHUB_EVENT_PATH}")
+  if [[ "${PR_ACTION}" != "closed" ]]; then
+    echo "Action is not 'closed', skip."
+    return 0
+  fi
+
+  # 获取 PR 源分支
+  PR_HEAD_REF=$(jq -r .pull_request.head.ref < "${GITHUB_EVENT_PATH}")
+
+  # 保护分支列表
+  PROTECTED_BRANCHES=("main" "master" "dev")
+  for b in "${PROTECTED_BRANCHES[@]}"; do
+    if [[ "$PR_HEAD_REF" == "$b" ]]; then
+      echo "Branch '${PR_HEAD_REF}' is protected, skip."
+      return 0
+    fi
+  done
+
+  # 保护 vX.X.X 格式分支
+  if [[ "$PR_HEAD_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Branch '${PR_HEAD_REF}' matches version pattern 'vX.X.X', skip."
+    return 0
+  fi
+
+  # 获取删除分支的 API URL
+  PR_HEAD_BRANCH_URL=$(jq -r .pull_request.head.repo.git_refs_url < "${GITHUB_EVENT_PATH}" | sed "s@{.*}@/heads/$PR_HEAD_REF@g")
+
+  echo "Deleting branch '${PR_HEAD_REF}' via API..."
+  curl --fail -X DELETE \
+       -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+       -H "Accept: application/vnd.github+json" \
+       "${PR_HEAD_BRANCH_URL}" \
+       && echo "Branch '${PR_HEAD_REF}' deleted successfully." \
+       || echo "Branch may have been already deleted or cannot delete."
+}
+
 
 if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]];then
   echo "Is not pull request event, exit"
@@ -89,3 +127,4 @@ fi
 on_pull_request_close_del_branch_if_need
 on_pull_request_open_edit_auto_label_it
 on_pull_request_open_add_reviewer
+on_pull_request_close_del_branch_if_need
