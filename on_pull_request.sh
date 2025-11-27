@@ -15,7 +15,7 @@ on_pull_request_close_del_branch_if_need() {
     return 0
   fi
 
-  PR_HEAD_BRANCH_URL=$(jq -r .pull_request.head.repo.git_refs_url < "${GITHUB_EVENT_PATH}" |sed "s@{.*}@/heads/$PR_HEAD_REF@g")
+  PR_HEAD_BRANCH_URL=$(jq -r .pull_request.head.repo.git_refs_url < "${GITHUB_EVENT_PATH}" |sed "s|{.*}|/heads/$PR_HEAD_REF|g")
 
   curl \
         --fail \
