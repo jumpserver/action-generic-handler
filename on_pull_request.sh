@@ -107,7 +107,7 @@ on_pull_request_close_del_branch_if_need() {
   fi
 
   # 获取删除分支的 API URL
-  PR_HEAD_BRANCH_URL=$(jq -r .pull_request.head.repo.git_refs_url < "${GITHUB_EVENT_PATH}" | sed "s@{.*}@/heads/$PR_HEAD_REF@g")
+  PR_HEAD_BRANCH_URL=$(jq -r .pull_request.head.repo.git_refs_url < "${GITHUB_EVENT_PATH}" | sed "s|{.*}|/heads/$PR_HEAD_REF|g")
 
   echo "Deleting branch '${PR_HEAD_REF}' via API..."
   curl --fail -X DELETE \
