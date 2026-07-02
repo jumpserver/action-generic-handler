@@ -65,7 +65,7 @@ on_pull_request_close_del_branch_if_need() {
   # 获取 PR 源分支
   PR_HEAD_REF=$(jq -r .pull_request.head.ref < "${GITHUB_EVENT_PATH}")
 
-  if [[ ! "${PR_HEAD_REF}" =~ 'pr_' ]];then
+  if [[ ! "${PR_HEAD_REF}" =~ 'pr@' ]];then
     echo "Not a valid pull request branch, pass"
     return 0
   fi
