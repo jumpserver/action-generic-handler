@@ -6,14 +6,17 @@
 
 generate_create_pr_data()
 {
-  cat <<EOF
-{
-  "title": "${PR_TITLE}",
-  "body": "${PR_BODY}",
-  "head": "${PR_HEAD}",
-  "base": "${PR_BASE}"
-}
-EOF
+  jq -nc \
+    --arg title "${PR_TITLE}" \
+    --arg body "${PR_BODY}" \
+    --arg head "${PR_HEAD}" \
+    --arg base "${PR_BASE}" \
+    '{
+      title: $title,
+      body: $body,
+      head: $head,
+      base: $base
+    }'
 }
 
 translate() {
@@ -24,7 +27,7 @@ translate() {
     return 0
   fi
   url="https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=zh&to=en"
-  data=$(printf '[{"text": "%s"}]' "$text")
+  data=$(jq -nc --arg text "$text" '[{text: $text}]')
   result=$(curl "${url}" \
       -X POST \
       -H "Ocp-Apim-Subscription-Key: ${I18N_TOKEN}" \
@@ -164,11 +167,15 @@ rebase_branch_and_push_pr_branch() {
   clean_remote_github
 }
 
-if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
-  exit 0
+main() {
+  if [[ "${GITHUB_EVENT_NAME}" != "push" ]];then
+    exit 0
+  fi
+
+  on_push_pr_branch
+  rebase_branch_and_push_pr_branch
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]];then
+  main "$@"
 fi
-
-on_push_pr_branch
-rebase_branch_and_push_pr_branch
-
-
