@@ -105,4 +105,3 @@ fi
 
 on_pull_request_close_del_branch_if_need
 on_pull_request_open_edit_auto_label_it
-on_pull_request_open_add_reviewer
